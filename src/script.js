@@ -1,22 +1,16 @@
 import './index.html';
 import './scss/index.scss';
 
-class NewTask {
-  #id;
-  #name;
-  #counter;
-  constructor(id, name, counter = 0) {
-    this.#id = id;
-    this.#name = name;
-    this.#counter = counter;
-  }
+import { NewTask } from './modules/newTask.js';
+import {
+  TaskTimer,
+} from './modules/taskTimer.js';
 
-  editName(name) {
-    return this.#name = name;
-  }
-
-  editCounter(number = 1) {
-    return this.#counter += number;
-  }
-}
-
+const task = new NewTask('study');
+const taskTimer = new TaskTimer({ timeComplete: 3 });
+console.log('taskTimer: ', taskTimer);
+taskTimer.setTask(task);
+console.log('taskTimer: ', taskTimer);
+taskTimer.setActivateTask(task.id)
+// .startTask()
+console.log('taskTimer: ', taskTimer);
