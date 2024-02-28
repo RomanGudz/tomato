@@ -1,3 +1,9 @@
+import {
+  ImportantTask,
+  StandardTask,
+  UnimportantTask,
+} from './newTask.js';
+
 export class TaskTimer {
   #time;
   constructor({
@@ -6,6 +12,8 @@ export class TaskTimer {
     timePause = 5,
     timeBigPause = 15,
   }) {
+    if (TaskTimer.newTimer) return TaskTimer.newTimer;
+    TaskTimer.newTimer = this;
     this.tasksList = tasksList;
     this.timeComplete = timeComplete * 60;
     this.timeBigPause = timeBigPause * 60;
@@ -14,8 +22,23 @@ export class TaskTimer {
     this.#time = 0 * 60;
   }
 
-  setTask(task) {
-    this.tasksList.push(task);
+  setTask(task, imp) {
+    const find = imp.find(item => item === task.importance);
+    let Command;
+    switch (find) {
+      case 'important':
+        Command = ImportantTask;
+        break;
+      case 'so-so':
+        Command = UnimportantTask;
+        break;
+      default:
+        Command = StandardTask;
+    }
+    const command = new Command(task);
+    if (command.execute()) {
+      this.tasksList.push(command);
+    }
     return this;
   }
 
@@ -27,8 +50,7 @@ export class TaskTimer {
 
   startTask() {
     if (this.activateTask === null) {
-      console.warn('У вас нет активной задачи');
-      return;
+      return 'У вас нет активной задачи';
     } else {
       const timerId = setInterval(() => {
         if (this.#time >= this.timeComplete) {
