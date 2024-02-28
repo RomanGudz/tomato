@@ -15,11 +15,15 @@ export class ControllerTomato {
 
   startTimer() {
     return this.taskTimer.startTask();
-
   }
 
   editTimerTask(id, number) {
     this.taskTimer.activateTask(id, number);
+    return this;
+  }
+
+  delete(id) {
+    this.taskTimer.deleteTask(id);
     return this;
   }
 }

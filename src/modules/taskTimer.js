@@ -47,7 +47,6 @@ export class TaskTimer {
     this.activateTask = task;
     return this;
   }
-
   startTask() {
     if (this.activateTask === null) {
       return 'У вас нет активной задачи';
@@ -101,6 +100,11 @@ export class TaskTimer {
   editCounterActiveTask(id, number) {
     const task = this.tasksList.find(task => task.id === id);
     task.editCounter(number);
+    return this;
+  }
+
+  deleteTask(id) {
+    this.tasksList = this.tasksList.filter(item => item.id !== id);
     return this;
   }
 }

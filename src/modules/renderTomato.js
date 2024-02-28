@@ -282,10 +282,21 @@ export class RenderTomato {
   popupToggle = () => {
     this.popup.forEach(element => {
       element.addEventListener('click', ({ target }) => {
-        const popup = target.closest('li');
-        popup.querySelector('.popup').classList.toggle('popup_active');
+        const elem = target.closest('li');
+        const modalpopup = elem.querySelector('.popup');
+        modalpopup.classList.toggle('popup_active');
+        const btnDelete = modalpopup.querySelector('.popup__delete-button');
+        btnDelete.addEventListener('click', () => {
+          this.deleteTask(elem);
+        });
       });
     });
+  };
+
+  deleteTask = (elem) => {
+    const taskId = elem.querySelector('.tasks__text').getAttribute('id');
+    const array = this.controller.delete(Number(taskId));
+    this.updateTasks(array);
   };
 
   activeTask = () => {
@@ -300,7 +311,7 @@ export class RenderTomato {
         const taskPanel = this.main.querySelector('.window__panel-task-text');
         taskPanel.textContent = `Томат ${tomatoNumber}`;
         titleTask.textContent = task.textContent;
-        // this.controller.addActivityTask(task.id)
+        this.controller.addActivityTask(Number(task.getAttribute('id')));
       });
     });
   };

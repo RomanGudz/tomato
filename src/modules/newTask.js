@@ -38,6 +38,10 @@ export class NewTask {
   get counter() {
     return this.#counter;
   }
+
+  get id() {
+    return this.#id;
+  }
   execute() {
     throw new Error('Not implemented')
   }
