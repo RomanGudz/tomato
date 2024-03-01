@@ -66,10 +66,8 @@ export class TaskTimer {
           clearInterval(timerId);
           return;
         }
-        // console.clear();
         this.#time++;
         this.activateTask.editCounter();
-        // console.log(this.activateTask.counter);
       }, 1000);
       return true;
     }
@@ -84,9 +82,7 @@ export class TaskTimer {
         console.log('Время перерыва закончилось');
         return;
       }
-      // console.clear();
       this.#time++;
-      // console.log(this.#time);
     }, 1000);
   }
 
@@ -99,9 +95,7 @@ export class TaskTimer {
         this.#time = 0;
         return;
       }
-      // console.clear();
       this.#time++;
-      // console.log(this.#time);
     }, 1000);
   }
 

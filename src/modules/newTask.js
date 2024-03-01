@@ -50,7 +50,6 @@ export class NewTask {
 export class ImportantTask extends NewTask {
   execute() {
     if (this.importance === 'important') {
-      console.log(this);
       return true;
     }
   }
@@ -59,7 +58,6 @@ export class ImportantTask extends NewTask {
 export class StandardTask extends NewTask {
   execute() {
     if (this.importance === 'default') {
-      console.log(this);
       return true;
     }
   }
@@ -68,7 +66,6 @@ export class StandardTask extends NewTask {
 export class UnimportantTask extends NewTask {
   execute() {
     if (this.importance === 'so-so') {
-      console.log(this);
       return true;
     }
   }
