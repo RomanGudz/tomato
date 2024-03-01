@@ -291,6 +291,8 @@ export class RenderTomato {
   stop = () => {
     this.btnStart.classList.toggle('hidden');
     this.btnStop.classList.toggle('hidden');
+    clearInterval(this.timerId);
+    this.controller.stopTimer();
     this.renameTime();
   };
 

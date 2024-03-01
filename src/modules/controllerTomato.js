@@ -41,6 +41,10 @@ export class ControllerTomato {
   getCount() {
     return this.taskTimer.countTask;
   }
+
+  stopTimer() {
+    return this.taskTimer.stopTimer();
+  }
 }
 
 export default ControllerTomato;

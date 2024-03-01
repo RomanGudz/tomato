@@ -9,9 +9,9 @@ export class TaskTimer {
   #countTask;
   constructor({
     tasksList = [],
-    timeComplete = 0.1,
-    timePause = 0.2,
-    timeBigPause = 0.15,
+    timeComplete = 25,
+    timePause = 5,
+    timeBigPause = 15,
   }) {
     if (TaskTimer.newTimer) return TaskTimer.newTimer;
     TaskTimer.newTimer = this;
@@ -22,6 +22,7 @@ export class TaskTimer {
     this.activateTask = null;
     this.#countTask = 0;
     this.#time = 0 * 60;
+    this.timerId;
   }
 
   setTask(task, imp) {
@@ -54,7 +55,7 @@ export class TaskTimer {
     if (this.activateTask === null) {
       return false;
     } else {
-      const timerId = setInterval(() => {
+      this.timerId = setInterval(() => {
         if (this.#time >= this.timeComplete) {
           console.log('Время выполнения задачи истекло');
           this.#time = 0;
@@ -63,7 +64,7 @@ export class TaskTimer {
           } else {
             this.startPause();
           }
-          clearInterval(timerId);
+          clearInterval(this.timerId);
           return;
         }
         this.#time++;
@@ -74,9 +75,9 @@ export class TaskTimer {
   }
 
   startPause() {
-    const timerId = setInterval(() => {
+    this.timerId = setInterval(() => {
       if (this.timePause === this.#time) {
-        clearInterval(timerId);
+        clearInterval(this.timerId);
         this.#time = 0;
         this.#countTask++;
         console.log('Время перерыва закончилось');
@@ -87,9 +88,9 @@ export class TaskTimer {
   }
 
   startBigPause() {
-    const timerId = setInterval(() => {
+    this.timerId = setInterval(() => {
       if (this.timeBigPause === this.#time) {
-        clearInterval(timerId);
+        clearInterval(this.timerId);
         console.log('Время перерыва закончилось');
         this.#countTask = 0;
         this.#time = 0;
@@ -99,6 +100,9 @@ export class TaskTimer {
     }, 1000);
   }
 
+  stopTimer() {
+    clearInterval(this.timerId);
+  }
   editCounterActiveTask(id, number) {
     const task = this.tasksList.find(task => task.id === id);
     task.editCounter(number);
