@@ -39,7 +39,7 @@ export class RenderTomato {
 
     const img = document.createElement('img');
     img.classList.add('header__logo');
-    img.src = 'img/svg/noto_tomato.svg';
+    img.src = '../img/svg/noto_tomato.svg';
     img.alt = 'Tomato image';
 
     const h1 = document.createElement('h1');
