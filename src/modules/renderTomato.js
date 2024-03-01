@@ -8,6 +8,8 @@ export class RenderTomato {
     this.header = document.createElement('header');
     this.main = document.createElement('main');
     this.count = 0;
+    this.totalTime = 0;
+    this.isPaused = false;
     this.changeImportman = 'default';
     this.init();
     this.btnStart = this.main.querySelector('.button-primary');
@@ -17,6 +19,7 @@ export class RenderTomato {
     this.addListener();
     this.btnActive;
     this.popup;
+    this.timerId;
   }
 
   init() {
@@ -81,7 +84,11 @@ export class RenderTomato {
 
     const windowTimer = document.createElement('p');
     windowTimer.classList.add('window__timer-text');
-    windowTimer.textContent = '25:00';
+    windowTimer.textContent = '00:00';
+
+    const h2 = document.createElement('h2');
+    h2.classList.add('header__title', 'hidden');
+    h2.textContent = 'У вас нет активной задачи';
 
     const windowBtn = document.createElement('div');
     windowBtn.classList.add('window__buttons');
@@ -94,7 +101,7 @@ export class RenderTomato {
       classBtn: ['button', 'button-secondary', 'hidden'],
     });
     windowBtn.append(btnStart, btnStop);
-    windowBody.append(windowTimer, windowBtn);
+    windowBody.append(h2, windowTimer, windowBtn);
     return windowBody;
   }
 
@@ -158,9 +165,7 @@ export class RenderTomato {
 
     const tasksDeadline = document.createElement('p');
     tasksDeadline.classList.add('tasks__deadline');
-    tasksDeadline.innerHTML = '1&nbsp;час 30&nbsp;мин';
     divTasks.append(p, this.initUl(), tasksDeadline);
-
     div.append(divTasks, this.divManual());
     return div;
   }
@@ -265,7 +270,7 @@ export class RenderTomato {
 
   addListener() {
     this.btnStart.addEventListener('click', this.start);
-    this.btnStop.addEventListener('click', this.start);
+    this.btnStop.addEventListener('click', this.stop);
     this.submit.addEventListener('submit', this.submitForm);
     this.btnImportman.addEventListener('click', this.importmanTask);
   }
@@ -275,8 +280,18 @@ export class RenderTomato {
     this.btnStop.classList.toggle('hidden');
     if (this.btnStart.classList.contains('hidden')) {
       const result = this.controller.startTimer();
-      console.warn(result);
+      if (result) {
+        this.timerDeadline();
+      } else {
+        this.renameTime();
+      }
     }
+  };
+
+  stop = () => {
+    this.btnStart.classList.toggle('hidden');
+    this.btnStop.classList.toggle('hidden');
+    this.renameTime();
   };
 
   popupToggle = () => {
@@ -295,8 +310,16 @@ export class RenderTomato {
 
   deleteTask = (elem) => {
     const taskId = elem.querySelector('.tasks__text').getAttribute('id');
+    const titleTask = this.main.querySelector('.window__panel-title');
+    const taskPanel = this.main.querySelector('.window__panel-task-text');
+    const deadline = this.main.querySelector('.window__timer-text');
     const array = this.controller.delete(Number(taskId));
     this.updateTasks(array);
+    deadline.textContent = '00:00';
+    taskPanel.textContent = '';
+    titleTask.textContent = '';
+    this.totalTime -= 25;
+    this.time();
   };
 
   activeTask = () => {
@@ -309,8 +332,16 @@ export class RenderTomato {
         task.classList.add('tasks__text_active');
         const titleTask = this.main.querySelector('.window__panel-title');
         const taskPanel = this.main.querySelector('.window__panel-task-text');
+        const deadline = this.main.querySelector('.window__timer-text');
+        if (this.btnStart.classList.contains('hidden')) {
+          this.renameTime();
+          this.btnStart.classList.toggle('hidden');
+          this.btnStop.classList.toggle('hidden');
+        }
+        deadline.textContent = '25:00';
         taskPanel.textContent = `Томат ${tomatoNumber}`;
         titleTask.textContent = task.textContent;
+        this.isPaused = false;
         this.controller.addActivityTask(Number(task.getAttribute('id')));
       });
     });
@@ -339,6 +370,8 @@ export class RenderTomato {
     const newTask = Object.fromEntries(formData);
     const newArray = this.controller.pushNewTasks(newTask, this.imp);
     this.updateTasks(newArray);
+    this.totalTime += 25;
+    this.time();
     target.reset();
   };
 
@@ -357,6 +390,100 @@ export class RenderTomato {
       .map((item, index) => this.initLi(item, index));
     return array;
   }
+
+  time() {
+    const deadline = this.main.querySelector('.tasks__deadline');
+    const hours = Math.floor(this.totalTime / 60);
+    const minutes = Math.floor(this.totalTime % 60);
+    if (hours > 0) {
+      deadline.innerHTML = '';
+      deadline.innerHTML = `${hours}&nbsp;${hourTitle(hours)} ${minutes}&nbsp;${minuteTitle(minutes)}`;
+    } else {
+      deadline.innerHTML = '';
+      deadline.innerHTML = `${minutes}&nbsp; ${minuteTitle(minutes)}`;
+    }
+  }
+
+  timerDeadline(time = this.controller.taskTimer.timeComplete) {
+    const deadline = this.main.querySelector('.window__timer-text');
+    let timeLeft = time;
+    const count = this.controller.getCount();
+    console.log('count: ', count);
+    this.timerId = setInterval(() => {
+      const minutes = Math.floor(timeLeft / 60);
+      const seconds = timeLeft % 60;
+      deadline.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+      if (timeLeft === 0) {
+        clearInterval(this.timerId);
+        if (!this.isPaused) {
+          const newArray = this.controller
+            .delete(this.controller.taskTimer.activateTask.id);
+          this.updateTasks(newArray);
+          this.totalTime -= 25;
+          this.time();
+          this.startPause(count);
+        }
+      } else {
+        timeLeft--;
+      }
+    }, 1000);
+  }
+
+  startPause(count) {
+    console.log('count: ', count);
+    if (count > 3) {
+      this.isPaused = true;
+      this.timerDeadline(this.controller.bigPause());
+    } else {
+      this.isPaused = true;
+      this.timerDeadline(this.controller.pause());
+    }
+  }
+
+  renameTime() {
+    const deadline = this.main.querySelector('.window__timer-text');
+    const h2 = this.main.querySelector('.header__title');
+    if (this.totalTime === 0) {
+      deadline.classList.toggle('hidden');
+      if (deadline.classList.contains('hidden')) {
+        h2.classList.toggle('hidden');
+      } else {
+        h2.classList.toggle('hidden');
+      }
+    }
+  }
 }
+
+const hourTitle = number => {
+  if (number > 10 && [11, 12, 13, 14].includes(number % 100)) {
+    return 'часов';
+  }
+  const lastnumber = number % 10;
+  if (lastnumber === 1) {
+    return 'час';
+  };
+  if ([2, 3, 4].includes(lastnumber)) {
+    return 'часа';
+  }
+  if ([5, 6, 7, 8, 9, 0].includes(lastnumber)) {
+    return 'часов';
+  }
+};
+
+const minuteTitle = number => {
+  if (number > 10 && [11, 12, 13, 14].includes(number % 100)) {
+    return 'минут';
+  }
+  const lastnumber = number % 10;
+  if (lastnumber === 1) {
+    return 'минута';
+  }
+  if ([2, 3, 4].includes(lastnumber)) {
+    return 'минуты';
+  }
+  if ([5, 6, 7, 8, 9, 0].includes(lastnumber)) {
+    return 'минут';
+  }
+};
 
 export default RenderTomato;

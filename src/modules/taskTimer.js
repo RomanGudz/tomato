@@ -6,11 +6,12 @@ import {
 
 export class TaskTimer {
   #time;
+  #countTask;
   constructor({
     tasksList = [],
-    timeComplete = 25,
-    timePause = 5,
-    timeBigPause = 15,
+    timeComplete = 0.1,
+    timePause = 0.2,
+    timeBigPause = 0.15,
   }) {
     if (TaskTimer.newTimer) return TaskTimer.newTimer;
     TaskTimer.newTimer = this;
@@ -19,6 +20,7 @@ export class TaskTimer {
     this.timeBigPause = timeBigPause * 60;
     this.timePause = timePause * 60;
     this.activateTask = null;
+    this.#countTask = 0;
     this.#time = 0 * 60;
   }
 
@@ -45,17 +47,18 @@ export class TaskTimer {
   setActivateTask(id) {
     const task = this.tasksList.find(task => task.id === id);
     this.activateTask = task;
+    this.#countTask++;
     return this;
   }
   startTask() {
     if (this.activateTask === null) {
-      return 'У вас нет активной задачи';
+      return false;
     } else {
       const timerId = setInterval(() => {
         if (this.#time >= this.timeComplete) {
           console.log('Время выполнения задачи истекло');
           this.#time = 0;
-          if (this.activateTask.counter > 3) {
+          if (this.#countTask > 3) {
             this.startBigPause();
           } else {
             this.startPause();
@@ -63,37 +66,42 @@ export class TaskTimer {
           clearInterval(timerId);
           return;
         }
-        console.clear();
+        // console.clear();
         this.#time++;
         this.activateTask.editCounter();
-        console.log(this.activateTask.counter);
+        // console.log(this.activateTask.counter);
       }, 1000);
+      return true;
     }
   }
+
   startPause() {
     const timerId = setInterval(() => {
       if (this.timePause === this.#time) {
         clearInterval(timerId);
         this.#time = 0;
+        this.#countTask++;
         console.log('Время перерыва закончилось');
         return;
       }
-      console.clear();
+      // console.clear();
       this.#time++;
-      console.log(this.#time);
+      // console.log(this.#time);
     }, 1000);
   }
+
   startBigPause() {
     const timerId = setInterval(() => {
       if (this.timeBigPause === this.#time) {
         clearInterval(timerId);
         console.log('Время перерыва закончилось');
+        this.#countTask = 0;
         this.#time = 0;
         return;
       }
-      console.clear();
+      // console.clear();
       this.#time++;
-      console.log(this.#time);
+      // console.log(this.#time);
     }, 1000);
   }
 
@@ -106,6 +114,14 @@ export class TaskTimer {
   deleteTask(id) {
     this.tasksList = this.tasksList.filter(item => item.id !== id);
     return this;
+  }
+
+  get time() {
+    return this.#time;
+  }
+
+  get countTask() {
+    return this.#countTask;
   }
 }
 

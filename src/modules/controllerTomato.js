@@ -26,6 +26,21 @@ export class ControllerTomato {
     this.taskTimer.deleteTask(id);
     return this;
   }
+  time() {
+    return this.taskTimer.time;
+  }
+
+  bigPause() {
+    return this.taskTimer.timeBigPause;
+  }
+
+  pause() {
+    return this.taskTimer.timePause;
+  }
+
+  getCount() {
+    return this.taskTimer.countTask;
+  }
 }
 
 export default ControllerTomato;
