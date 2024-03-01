@@ -301,11 +301,48 @@ export class RenderTomato {
         const modalpopup = elem.querySelector('.popup');
         modalpopup.classList.toggle('popup_active');
         const btnDelete = modalpopup.querySelector('.popup__delete-button');
-        btnDelete.addEventListener('click', () => {
-          this.deleteTask(elem);
-        });
+        const eventModal = () => {
+          const modalDelete = document.body.querySelector('.modal-overlay');
+          modalDelete.style.display = 'flex';
+          this.openOrCloseModal(modalDelete, elem);
+          modalpopup.classList.toggle('popup_active');
+          btnDelete.removeEventListener('click', eventModal);
+        };
+        btnDelete.addEventListener('click', eventModal);
       });
     });
+  };
+
+  openOrCloseModal = (modal, elem) => {
+    const btnCancel = modal.querySelector('.modal-delete__cancel-button');
+    const btnDelete = modal.querySelector('.modal-delete__delete-button');
+    const btnClose = modal.querySelector('.modal-delete__close-button');
+    const deleteTask = () => {
+      this.deleteTask(elem);
+      modal.style.display = 'none';
+      btnDelete.removeEventListener('click', deleteTask);
+    };
+    const cancel = () => {
+      modal.style.display = 'none';
+      modal.remove();
+      document.body.append(this.modal());
+      btnCancel.removeEventListener('click', cancel);
+    };
+
+    const outsideClickHandler = (event) => {
+      const outsideModal = event.target.classList.contains('modal-delete');
+      if (!outsideModal) {
+        modal.style.display = 'none';
+        modal.remove();
+        document.body.append(this.modal());
+        document.removeEventListener('click', outsideClickHandler);
+      }
+    };
+
+    btnDelete.addEventListener('click', deleteTask);
+    btnCancel.addEventListener('click', cancel);
+    btnClose.addEventListener('click', cancel);
+    modal.addEventListener('click', outsideClickHandler);
   };
 
   deleteTask = (elem) => {
