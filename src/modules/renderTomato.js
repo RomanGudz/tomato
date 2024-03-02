@@ -282,6 +282,7 @@ export class RenderTomato {
       const result = this.controller.startTimer();
       if (result) {
         this.timerDeadline();
+        this.stopEvent();
       } else {
         this.renameTime();
       }
@@ -293,6 +294,7 @@ export class RenderTomato {
     this.btnStop.classList.toggle('hidden');
     clearInterval(this.timerId);
     this.controller.stopTimer();
+    this.stopEvent();
     this.renameTime();
   };
 
@@ -490,6 +492,13 @@ export class RenderTomato {
         h2.classList.toggle('hidden');
       }
     }
+  }
+
+  stopEvent() {
+    const liElements = this.main.querySelectorAll('li');
+    liElements.forEach(li => {
+      li.classList.toggle('no-click');
+    });
   }
 }
 

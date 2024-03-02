@@ -89,3 +89,7 @@
     color: $deadline-timer;
   }
 }
+
+.no-click {
+  pointer-events: none;
+}
